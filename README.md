@@ -1,74 +1,98 @@
 # Movie Journal App
 
-A mobile application for tracking and reviewing movies you've watched.
-
-## Setup Instructions
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- SQL Server (Express or Developer Edition)
-- React Native development environment
-
-### Database Setup
-
-1. Open SQL Server Management Studio (SSMS) or Azure Data Studio
-2. Connect to your SQL Server instance
-3. Open the `backend/database.sql` file and execute it to create the database and tables
-4. Make sure you have a SQL Server user with appropriate permissions
-
-### Backend Setup
-
-1. Navigate to the `backend` directory:
-   ```
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Update the database connection settings in `server.js`:
-   - Replace `'sa'` with your SQL Server username
-   - Replace `'YourPassword'` with your SQL Server password
-
-4. Start the backend server:
-   ```
-   node server.js
-   ```
-
-### Frontend Setup
-
-1. Navigate to the project root directory
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Start the React Native app:
-   ```
-   npx react-native run-android
-   ```
-   or
-   ```
-   npx react-native run-ios
-   ```
+A React Native mobile application for tracking and managing your movie watching experience. Create lists, add reviews, and keep track of your favorite films.
 
 ## Features
 
-- User registration and login
+- User authentication (register/login)
+- Create and manage movie lists
+- Search movies using TMDB API
+- Add movies to lists
+- Write and edit reviews
 - Profile management
-- Movie search and details
-- Add movies to watchlist
-- Rate and review movies you've watched
-- Track your movie watching history
+- Responsive and modern UI
 
-## Project Structure
+## Tech Stack
 
-- `backend/` - Express.js server with SQL Server database
-- `src/` - React Native frontend code
-  - `screens/` - App screens
-  - `navigation/` - Navigation configuration
-  - `components/` - Reusable UI components
-  - `services/` - API service functions 
+- Frontend: React Native with Expo
+- Backend: Node.js with Express
+- Database: Microsoft SQL Server
+- Authentication: JWT
+- Movie Data: TMDB API
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- Microsoft SQL Server
+- Expo CLI
+- TMDB API key
+
+## Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/SuOrten/FilmDiaryAppIOS.git
+cd FilmDiaryAppIOS
+```
+
+2. Install dependencies:
+```bash
+# Install frontend dependencies
+npm install
+
+# Install backend dependencies
+cd backend
+npm install
+```
+
+3. Set up environment variables:
+
+Create `.env` file in the root directory:
+```
+EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
+EXPO_PUBLIC_BACKEND_URL=http://localhost:5001
+```
+
+Create `.env` file in the backend directory:
+```
+DB_SERVER=localhost
+DB_NAME=MovieJournalDB
+DB_INSTANCE=your_instance_name
+JWT_SECRET=your_jwt_secret
+PORT=5001
+```
+
+4. Set up the database:
+- Run the SQL scripts in `backend/database.sql` to create the database and tables
+
+5. Start the backend server:
+```bash
+cd backend
+npm start
+```
+
+6. Start the frontend:
+```bash
+# In the root directory
+npm start
+```
+
+## Security
+
+- Passwords are hashed using bcrypt
+- JWT authentication for API endpoints
+- Environment variables for sensitive data
+- SQL injection prevention using parameterized queries
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 

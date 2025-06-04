@@ -1,6 +1,9 @@
 const express = require('express');
 const sql = require('mssql/msnodesqlv8');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -13,13 +16,13 @@ app.use((req, res, next) => {
 });
 
 const config = {
-  server: 'localhost',
-  database: 'MovieJournalDB',
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
   options: {
     trustedConnection: true,
     trustServerCertificate: true,
     encrypt: false,
-    instanceName: 'EVALUATIONSQL22',
+    instanceName: process.env.DB_INSTANCE,
   }
 };
 
@@ -65,10 +68,13 @@ app.post('/api/register', async (req, res) => {
       });
     }
     
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
     // Insert new user
     const result = await sql.query`
       INSERT INTO Users (Username, Email, Password)
-      VALUES (${username}, ${email}, ${password})
+      VALUES (${username}, ${email}, ${hashedPassword})
     `;
     console.log('User registered successfully');
     
@@ -93,13 +99,37 @@ app.post('/api/login', async (req, res) => {
   try {
     await sql.connect(config);
     const result = await sql.query`
-      SELECT * FROM Users WHERE Email = ${email} AND Password = ${password}
+      SELECT * FROM Users WHERE Email = ${email}
     `;
-    if (result.recordset.length > 0) {
-      res.status(200).json({ success: true, message: 'Login successful' });
-    } else {
-      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    
+    if (result.recordset.length === 0) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
+
+    const user = result.recordset[0];
+    const passwordMatch = await bcrypt.compare(password, user.Password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user.UserID, email: user.Email },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Login successful',
+      token,
+      user: {
+        id: user.UserID,
+        username: user.Username,
+        email: user.Email
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error logging in' });
@@ -108,8 +138,27 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.put('/api/profile', async (req, res) => {
-  const { userID, fullName, username, email, bio, favoriteGenres, profilePhoto } = req.body;
+// Middleware to verify JWT token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Authentication required' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ success: false, message: 'Invalid token' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Protected routes should use authenticateToken middleware
+app.put('/api/profile', authenticateToken, async (req, res) => {
+  const { fullName, username, email, bio, favoriteGenres, profilePhoto } = req.body;
   try {
     await sql.connect(config);
     await sql.query`
@@ -121,7 +170,7 @@ app.put('/api/profile', async (req, res) => {
         Bio = ${bio},
         FavoriteGenres = ${favoriteGenres},
         ProfilePhoto = ${profilePhoto}
-      WHERE UserID = ${userID}
+      WHERE UserID = ${req.user.userId}
     `;
     res.status(200).json({ success: true, message: 'Profile updated successfully' });
   } catch (err) {

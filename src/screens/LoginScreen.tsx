@@ -8,6 +8,8 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +25,7 @@ const LoginScreen = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.31.123:5001/api/login', {
+      const response = await fetch(`${BACKEND_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

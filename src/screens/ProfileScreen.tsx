@@ -16,6 +16,8 @@ const GENRES = [
 
 type ProfileScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
 const ProfileScreen = () => {
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
@@ -60,7 +62,7 @@ const ProfileScreen = () => {
     try {
       // Dummy userID for now
       const userID = 1;
-      const response = await fetch('http://192.168.31.123:5001/api/profile', {
+      const response = await fetch(`${BACKEND_URL}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

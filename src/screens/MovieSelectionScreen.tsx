@@ -6,11 +6,10 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-const TMDB_API_KEY = 'fc5d92c1924b588ee76647a13bf3d313';
+const TMDB_API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY;
 const TMDB_SEARCH_URL = 'https://api.themoviedb.org/3/search/movie';
 const TMDB_IMAGE_URL = 'https://image.tmdb.org/t/p/w185';
-const BACKEND_URL = 'http://192.168.31.123:5001';
-const userID = 12; // This will be replaced with actual user ID from login
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 type MovieSelectionScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MovieSelection'>;
 type MovieSelectionScreenRouteProp = RouteProp<RootStackParamList, 'MovieSelection'>;

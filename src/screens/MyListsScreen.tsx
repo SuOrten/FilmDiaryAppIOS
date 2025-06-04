@@ -6,8 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-const BACKEND_URL = 'http://192.168.31.123:5001';
-const userID = 12; // This will be replaced with actual user ID from login
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 type MyListsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MyLists'>;
 

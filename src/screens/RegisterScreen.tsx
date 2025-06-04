@@ -15,6 +15,7 @@ const RegisterScreen = () => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
@@ -30,7 +31,7 @@ const RegisterScreen = () => {
     setLoading(true);
     try {
       console.log('Sending registration request...');
-      const response = await fetch('http://192.168.31.123:5001/api/register', {
+      const response = await fetch(`${BACKEND_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
