@@ -4,7 +4,7 @@ A React Native mobile application for tracking and managing your movie watching 
 
 ## Features
 
-- User authentication (register/login)
+- Register/Login
 - Create and manage movie lists
 - Search movies using TMDB API
 - Add movies to lists
@@ -17,7 +17,6 @@ A React Native mobile application for tracking and managing your movie watching 
 - Frontend: React Native with Expo
 - Backend: Node.js with Express
 - Database: Microsoft SQL Server
-- Authentication: JWT
 - Movie Data: TMDB API
 
 ## Prerequisites
@@ -59,7 +58,6 @@ Create `.env` file in the backend directory:
 DB_SERVER=localhost
 DB_NAME=MovieJournalDB
 DB_INSTANCE=your_instance_name
-JWT_SECRET=your_jwt_secret
 PORT=5001
 ```
 
@@ -77,22 +75,3 @@ npm start
 # In the root directory
 npm start
 ```
-
-## Security
-
-- Passwords are hashed using bcrypt
-- JWT authentication for API endpoints
-- Environment variables for sensitive data
-- SQL injection prevention using parameterized queries
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
