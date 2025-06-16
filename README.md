@@ -1,4 +1,4 @@
-# Movie Journal App
+# Film Diary App
 
 A React Native mobile application for tracking and managing your movie watching experience. Create lists, add reviews, and keep track of your favorite films.
 
