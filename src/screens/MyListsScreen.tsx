@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -23,8 +24,20 @@ const MyListsScreen = () => {
 
   const fetchUserLists = async () => {
     try {
-      console.log('Fetching lists for user:', userID);
-      const response = await fetch(`${BACKEND_URL}/api/lists/${userID}`);
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token available');
+        navigation.navigate('Login');
+        return;
+      }
+      
+      console.log('Fetching lists for authenticated user');
+      const response = await fetch(`${BACKEND_URL}/api/lists`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Fetched lists data:', JSON.stringify(data, null, 2));
@@ -43,11 +56,21 @@ const MyListsScreen = () => {
   const createList = async () => {
     if (!newListName) return;
     try {
-      console.log('Creating new list:', { userID, listName: newListName });
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token available');
+        navigation.navigate('Login');
+        return;
+      }
+
+      console.log('Creating new list:', { listName: newListName });
       const response = await fetch(`${BACKEND_URL}/api/lists`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userID, listName: newListName }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ listName: newListName }),
       });
       console.log('Create list response status:', response.status);
       const data = await response.json();

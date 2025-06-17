@@ -159,6 +159,7 @@ const authenticateToken = (req, res, next) => {
 // Protected routes should use authenticateToken middleware
 app.put('/api/profile', authenticateToken, async (req, res) => {
   const { fullName, username, email, bio, favoriteGenres, profilePhoto } = req.body;
+  console.log('Profile update request:', { userId: req.user.userId, fullName, username, email });
   try {
     await sql.connect(config);
     await sql.query`
@@ -172,9 +173,10 @@ app.put('/api/profile', authenticateToken, async (req, res) => {
         ProfilePhoto = ${profilePhoto}
       WHERE UserID = ${req.user.userId}
     `;
+    console.log('Profile updated successfully for user:', req.user.userId);
     res.status(200).json({ success: true, message: 'Profile updated successfully' });
   } catch (err) {
-    console.error(err);
+    console.error('Profile update error:', err);
     res.status(500).json({ success: false, message: 'Error updating profile' });
   } finally {
     sql.close();
@@ -182,8 +184,9 @@ app.put('/api/profile', authenticateToken, async (req, res) => {
 });
 
 // Create a new list for a user
-app.post('/api/lists', async (req, res) => {
-  const { userID, listName } = req.body;
+app.post('/api/lists', authenticateToken, async (req, res) => {
+  const { listName } = req.body;
+  const userID = req.user.userId; // Token'dan userID al
   console.log('Creating new list:', { userID, listName });
   try {
     await sql.connect(config);
@@ -206,7 +209,7 @@ app.post('/api/lists', async (req, res) => {
 });
 
 // Add a movie to a list (and to Movies table if it doesn't exist)
-app.post('/api/lists/:listID/movies', async (req, res) => {
+app.post('/api/lists/:listID/movies', authenticateToken, async (req, res) => {
   const { listID } = req.params;
   const { tmdbID, title, posterURL, releaseYear, overview } = req.body;
   try {
@@ -241,8 +244,8 @@ app.post('/api/lists/:listID/movies', async (req, res) => {
 });
 
 // Fetch all lists for a user (with their movies)
-app.get('/api/lists/:userID', async (req, res) => {
-  const { userID } = req.params;
+app.get('/api/lists', authenticateToken, async (req, res) => {
+  const userID = req.user.userId; // Token'dan userID al
   console.log('Fetching lists for user:', userID);
   try {
     await sql.connect(config);
@@ -334,7 +337,7 @@ app.delete('/api/lists/:listID', async (req, res) => {
 });
 
 // Delete a movie from a list
-app.delete('/api/lists/:listID/movies/:movieID', async (req, res) => {
+app.delete('/api/lists/:listID/movies/:movieID', authenticateToken, async (req, res) => {
   const { listID, movieID } = req.params;
   console.log('Attempting to delete movie:', movieID, 'from list:', listID);
   try {
@@ -381,7 +384,7 @@ app.delete('/api/lists/:listID/movies/:movieID', async (req, res) => {
 });
 
 // Save a review for a movie in a list
-app.post('/api/lists/:listID/movies/:movieID/review', async (req, res) => {
+app.post('/api/lists/:listID/movies/:movieID/review', authenticateToken, async (req, res) => {
   const { listID, movieID } = req.params;
   const { review } = req.body;
   console.log('Saving review for movie:', movieID, 'in list:', listID);

@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -37,6 +38,12 @@ const LoginScreen = () => {
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
+      }
+
+      // Token'ı AsyncStorage'a kaydet
+      if (data.token) {
+        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
       }
 
       Alert.alert('Success', data.message || 'Login successful!', [

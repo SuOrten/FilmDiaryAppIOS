@@ -5,9 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BACKEND_URL = 'http://192.168.31.123:5001';
-const userID = 12; // This will be replaced with actual user ID from login
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 type EditListScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EditList'>;
 type EditListScreenRouteProp = RouteProp<RootStackParamList, 'EditList'>;
@@ -28,8 +28,20 @@ const EditListScreen = () => {
 
   const fetchListContents = async () => {
     try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token available');
+        navigation.navigate('Login');
+        return;
+      }
+
       console.log('Fetching list contents for listID:', listID);
-      const response = await fetch(`${BACKEND_URL}/api/lists/${userID}`);
+      const response = await fetch(`${BACKEND_URL}/api/lists`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       console.log('Fetched data:', data);
       
@@ -67,8 +79,18 @@ const EditListScreen = () => {
           style: 'destructive',
           onPress: async () => {
             try {
+              const token = await AsyncStorage.getItem('authToken');
+              if (!token) {
+                Alert.alert('Error', 'Authentication required. Please login again.');
+                navigation.navigate('Login');
+                return;
+              }
+
               const response = await fetch(`${BACKEND_URL}/api/lists/${listID}/movies/${movieID}`, {
                 method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
               });
               const data = await response.json();
               if (data.success) {
@@ -100,10 +122,19 @@ const EditListScreen = () => {
     
     setLoading(true);
     try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        Alert.alert('Error', 'Authentication required. Please login again.');
+        navigation.navigate('Login');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/api/lists/${listID}/movies/${selectedMovie.MovieID}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ review: reviewText }),
       });

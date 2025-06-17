@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TMDB_API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY;
 const TMDB_SEARCH_URL = 'https://api.themoviedb.org/3/search/movie';
@@ -47,9 +48,19 @@ const MovieSelectionScreen = () => {
       return;
     }
     try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        alert('Authentication required. Please login again.');
+        navigation.navigate('Login');
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/api/lists/${selectedListID}/movies`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           tmdbID: movie.id,
           title: movie.title,

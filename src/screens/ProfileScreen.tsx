@@ -7,6 +7,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GENRES = [
   'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary',
@@ -27,6 +28,23 @@ const ProfileScreen = () => {
   const [profilePhoto, setProfilePhoto] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<ProfileScreenNavigationProp>();
+
+  // Kullanıcı verilerini yükle
+  React.useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const user = JSON.parse(userData);
+          setUsername(user.username || '');
+          setEmail(user.email || '');
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+    loadUserData();
+  }, []);
 
   const handleGenreToggle = (genre: string) => {
     setFavoriteGenres(prev =>
@@ -60,15 +78,22 @@ const ProfileScreen = () => {
     }
     setLoading(true);
     try {
-      // Dummy userID for now
-      const userID = 1;
+      // Token'ı AsyncStorage'dan al
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        Alert.alert('Error', 'Authentication required. Please login again.');
+        navigation.navigate('Login');
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userID,
           fullName,
           username,
           email,
@@ -84,7 +109,7 @@ const ProfileScreen = () => {
       Alert.alert('Success', data.message || 'Profile updated successfully!', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('MovieSelection'),
+          onPress: () => navigation.navigate('MyLists'),
         },
       ]);
     } catch (error) {
@@ -92,6 +117,21 @@ const ProfileScreen = () => {
       Alert.alert('Error', error instanceof Error ? error.message : 'Profile update failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('userData');
+      Alert.alert('Success', 'Logged out successfully', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('Login'),
+        },
+      ]);
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -173,6 +213,15 @@ const ProfileScreen = () => {
               disabled={loading}
             >
               Update Profile
+            </Button>
+
+            <Button
+              mode="outlined"
+              onPress={handleLogout}
+              style={[styles.button, { marginTop: 20 }]}
+              disabled={loading}
+            >
+              Logout
             </Button>
           </View>
         </Surface>
