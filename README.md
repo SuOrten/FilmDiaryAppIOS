@@ -2,6 +2,13 @@
 
 A React Native mobile application for tracking and managing your movie watching experience. Create lists, add reviews, and keep track of your favorite films.
 
+TUR: Bu drive linkinde projenin videosuna ve APK'ye erişim sağlayabilirsiniz. Database'i oluşturmak için gerekli komutlar databse.sql dosyasının içerisindedir.
+
+ENG: You can access the project video and the APK through this link. The commands to create the database are contained inside the database.sql file
+
+Link:
+https://drive.google.com/drive/folders/1lOOrXxPagoZmCa6CI4Bo_zFrXBZ3h0YI?usp=sharing
+
 ## Features
 
 - Register/Login
