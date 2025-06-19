@@ -26,6 +26,7 @@ A React Native mobile application for tracking and managing your movie watching 
 - Microsoft SQL Server
 - Expo CLI
 - TMDB API key
+- JWT Token
 
 ## Setup
 
